@@ -9,7 +9,7 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(12),
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().default("gpt-4.1-mini"),
-  N8N_BASE_URL: z.string().url(),
+  N8N_BASE_URL: z.string().url().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   FRONTEND_URL: z.string().url()
