@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Sex {
+  male
+  female
+}
+
+enum ActivityLevel {
+  sedentary
+  light
+  moderate
+  high
+}
+
+enum GoalType {
+  lose_weight
+  maintain
+  gain_muscle
+}
+
+enum DietPreference {
+  standard
+  fitness
+  low_carb
+  mediterranean
+  vegetarian
+  vegan
+  gluten_free
+  budget
+}
+
+enum CookingPreference {
+  daily
+  multi_day
+  quick
+}
+
+enum SubscriptionTier {
+  free
+  pro
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  passwordHash   String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  profile        Profile?
+  mealPlans      MealPlan[]
+  shoppingList   ShoppingList[]
+  dailyLogs      DailyLog[]
+  subscriptions  Subscription[]
+}
+
+model Profile {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  age               Int
+  sex               Sex
+  heightCm          Int
+  weightKg          Decimal           @db.Decimal(6,2)
+  goalWeightKg      Decimal           @db.Decimal(6,2)
+  goalType          GoalType
+  activityLevel     ActivityLevel
+  dietPreference    DietPreference
+  allergies         String[]
+  monthlyBudget     Decimal           @db.Decimal(10,2)
+  cookingPreference CookingPreference
+  householdSize     Int
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MealPlan {
+  id             String      @id @default(uuid())
+  userId         String
+  title          String
+  days           Int
+  status         String
+  startDate      DateTime
+  targetCalories Int
+  targetProtein  Int
+  targetCarbs    Int
+  targetFat      Int
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipes        Recipe[]
+}
+
+model Recipe {
+  id          String             @id @default(uuid())
+  mealPlanId  String
+  dayIndex    Int
+  mealType    String
+  name        String
+  recipeText  String
+  calories    Int
+  protein     Int
+  carbs       Int
+  fat         Int
+  mealPlan    MealPlan           @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  ingredients RecipeIngredient[]
+}
+
+model Ingredient {
+  id                String              @id @default(uuid())
+  name              String              @unique
+  recipeIngredients RecipeIngredient[]
+  storePrices       StorePrice[]
+}
+
+model RecipeIngredient {
+  id            String      @id @default(uuid())
+  recipeId      String
+  ingredientId  String
+  quantity      Decimal     @db.Decimal(10,2)
+  unit          String
+  recipe        Recipe      @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient    Ingredient  @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+}
+
+model ShoppingList {
+  id        String             @id @default(uuid())
+  userId    String
+  name      String
+  createdAt DateTime           @default(now())
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     ShoppingListItem[]
+}
+
+model ShoppingListItem {
+  id              String        @id @default(uuid())
+  shoppingListId  String
+  ingredientName  String
+  quantity        Decimal       @db.Decimal(10,2)
+  unit            String
+  estimatedPrice  Decimal       @db.Decimal(10,2)
+  recommendedStore String
+  purchased       Boolean       @default(false)
+  shoppingList    ShoppingList  @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
+}
+
+model DailyLog {
+  id            String   @id @default(uuid())
+  userId        String
+  date          DateTime
+  energyLevel   Int
+  hungerLevel   Int
+  satisfaction  Int
+  notes         String?
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}
+
+model StorePrice {
+  id            String      @id @default(uuid())
+  storeName     String
+  ingredientId  String
+  price         Decimal     @db.Decimal(10,2)
+  currency      String      @default("EUR")
+  unit          String
+  source        String
+  capturedAt    DateTime    @default(now())
+  ingredient    Ingredient  @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([storeName, ingredientId])
+}
+
+model Subscription {
+  id                 String            @id @default(uuid())
+  userId             String
+  tier               SubscriptionTier  @default(free)
+  stripeCustomerId   String?           @unique
+  stripeSubscriptionId String?         @unique
+  status             String
+  currentPeriodEnd   DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

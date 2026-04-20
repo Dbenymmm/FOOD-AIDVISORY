@@ -1,0 +1,50 @@
+{
+  "name": "food-aidvisory-automation",
+  "nodes": [
+    {
+      "name": "Generate Meal Plan Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": { "httpMethod": "POST", "path": "generate-meal-plan" },
+      "position": [100, 100]
+    },
+    {
+      "name": "LLM Meal Planner",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/responses",
+        "jsonParameters": true
+      },
+      "position": [330, 100]
+    },
+    {
+      "name": "Aggregate Shopping",
+      "type": "n8n-nodes-base.function",
+      "parameters": { "functionCode": "return items;" },
+      "position": [560, 100]
+    },
+    {
+      "name": "Optimize Prices",
+      "type": "n8n-nodes-base.function",
+      "parameters": { "functionCode": "// compare Lidl/Albert/Tesco/Kaufland\nreturn items;" },
+      "position": [780, 100]
+    },
+    {
+      "name": "Nutrition Analysis Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": { "httpMethod": "POST", "path": "nutrition-analysis" },
+      "position": [100, 350]
+    }
+  ],
+  "connections": {
+    "Generate Meal Plan Webhook": {
+      "main": [[{ "node": "LLM Meal Planner", "type": "main", "index": 0 }]]
+    },
+    "LLM Meal Planner": {
+      "main": [[{ "node": "Aggregate Shopping", "type": "main", "index": 0 }]]
+    },
+    "Aggregate Shopping": {
+      "main": [[{ "node": "Optimize Prices", "type": "main", "index": 0 }]]
+    }
+  }
+}

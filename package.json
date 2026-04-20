@@ -1,0 +1,15 @@
+{
+  "name": "food-aidvisory-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/backend",
+    "apps/frontend",
+    "packages/shared"
+  ],
+  "scripts": {
+    "build": "npm run -w packages/shared build && npm run -w apps/backend build && npm run -w apps/frontend build",
+    "dev": "npm run -w apps/backend dev",
+    "lint": "npm run -w apps/backend lint && npm run -w apps/frontend lint",
+    "format": "echo 'Add prettier if desired'"
+  }
+}
