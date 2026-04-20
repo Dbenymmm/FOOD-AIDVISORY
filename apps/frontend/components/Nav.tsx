@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const links = [
+const links: Array<[string, string]> = [
   ["/", "Home"],
   ["/dashboard", "Dashboard"],
   ["/meal-plan", "Meal Plan"],
