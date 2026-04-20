@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-const links: Array<[string, string]> = [
+const links = [
   ["/", "Home"],
   ["/dashboard", "Dashboard"],
   ["/meal-plan", "Meal Plan"],
   ["/shopping-list", "Shopping List"],
   ["/coach", "AI Coach"]
-];
+] as const;
 
 export function Nav() {
   return (
